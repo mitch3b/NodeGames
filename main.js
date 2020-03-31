@@ -41,8 +41,16 @@
     var result = confirm("Are you sure you want to restart?"); 
     if (result == true) { 
       gameOver = false;
+      $('#buttonToucher').prop('checked', false);
+      $('#spyMaster').prop('checked', false);
+      $(".show-words").attr('class','tile');  
+      player.isButtonPresser = false;
       socket.emit('restartGame', { name, room: roomId });
-    } 
+    }
+  });
+  
+  $('#teamSelect').on('change', function() {
+    alert( this.value );
   });
    
   $('#turnCompleteButton').on('click', () => {
@@ -53,11 +61,33 @@
     
     socket.emit('turnComplete', { name, room: roomId }); 
   });
+  
+  $('#buttonToucher').change(
+    function(){
+      var isChecked = $(this).is(':checked')
+      player.isButtonPresser = isChecked;
+      //TODO the not a button pusher case
+      socket.emit('isNowAButtonPusher', { name, room: roomId }); 
+    });
+    
+  $('#spyMaster').change(
+    function(){
+      var isChecked = $(this).is(':checked')
+      if(isChecked) {
+        $(".tile").addClass("show-words");
+        socket.emit('isNowASpyMaster', { name, room: roomId });         
+      }
+      else {
+        // Reset class to just tile
+        $(".show-words").attr('class','tile');   
+        socket.emit('noLongerASpyMaster', { name, room: roomId });  
+      }
+    });
 
   class Player {
-    constructor(name, isButtonPresser) {
+    constructor(name) {
       this.name = name;
-      this.isButtonPresser = isButtonPresser;
+      this.isButtonPresser = false;
     }
   }
 
@@ -78,10 +108,9 @@
     }
     
     // Remove the menu from DOM, display the gameboard and greet the player.
-    displayBoard(message) {
+    displayBoard() {
       $('.menu').css('display', 'none');
       $('.gameBoard').css('display', 'block');
-      $('#userHello').html(message);
       this.initBoard();
     }
   }
@@ -115,7 +144,7 @@
       return;
     }
     socket.emit('createGame', { name });
-    player = new Player(name, BLUE_TEAM);
+    player = new Player(name);
   });
 
   // Join an existing game on the entered roomId. Emit the joinGame event.
@@ -133,25 +162,19 @@
   // Create/Join game incoming events (ack) 
   // ####################################
   socket.on('newGame', (data) => {
-    const message =
-      `Hello, ${data.name}. Please ask your friend to enter Game ID: 
-      ${data.room}. Waiting for player 2...`;
-
-    // Create game for player 1
     codeNamesGame = JSON.parse(data.game);
     game = new Game(data.room, codeNamesGame.words);
     roomId = data.room;
-    game.displayBoard(message);
+    game.displayBoard();
     addPlayerToTeam(data.name, data.color);
+    $('#teamSelect').val(data.color);
         
     $('#currentTurn').text(codeNamesGame.currentTurn);
     updateRemaining(codeNamesGame.numBluesLeft, codeNamesGame.numRedsLeft);
   });
 
   socket.on('joinGame', (data) => {
-    const message = `Hello, ${player.getPlayerName()}`;
-    $('#userHello').html(message);
-    player.setCurrentTurn(true);
+    $('#teamSelect').val(data.color);
     roomId = data.room;
   });
   
@@ -190,12 +213,12 @@
   });
   
   socket.on('InitForJoiningPlayer', (data) => {
-    const message = `Hello, ${data.name}`;
-
-    // Create game for player 2
+    player = new Player(data.name);
+    roomId = data.room;
     codeNamesGame = JSON.parse(data.game);
     game = new Game(data.room, codeNamesGame.words);
-    game.displayBoard(message);
+    game.displayBoard();
+    $('#teamSelect').val(data.color);
     
     updateRemaining(codeNamesGame.numBluesLeft, codeNamesGame.numRedsLeft);
     $('#currentTurn').text(codeNamesGame.currentTurn);
@@ -206,6 +229,15 @@
     codeNamesGame.redPlayers.forEach(addPlayerToRedTeam);
   });
   
+  socket.on('UpdateKey', (data) => {
+    var wordColors = JSON.parse(data.wordColors);
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
+        $(`#button_${i}${j}`).addClass("key-" + wordColors[i][j]);
+      }
+    }
+  });
+   
 
   // ####################################
   // Game in progress TODO

@@ -180,6 +180,10 @@ class CodeNamesGame {
   getWinner() {
     return this.winner;
   }
+  
+  getWordColors() {
+    return this.wordColors;
+  }
 }
 
 module.exports = CodeNamesGame;

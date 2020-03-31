@@ -19,7 +19,6 @@
 				<button id="join">Join Game</button>
 			</div>
 			<div class="gameBoard" style="display: none;">
-				<h2 id="userHello"></h2>
 				Current Turn: <span id="currentTurn"></span><br>
         Remaining: 
           <span id="blueWordsLeft" class="blue">oasdofsojfi</span> - 
@@ -62,6 +61,25 @@
 					</tr>
 				</table>
         <button id="turnCompleteButton">Done Guessing</button>
+        <br>
+        Team: 
+        <select id="teamSelect">
+          <option value="blue">Blue</option>
+          <option value="red">Red</option>
+        </select>
+        
+        Is Spy Master: 
+        <label class="switch">
+          <input type="checkbox" id="spyMaster">
+          <span class="slider round"></span>
+        </label>
+        
+        Can Push Buttons:
+        <label class="switch">
+          <input type="checkbox" id="buttonToucher">
+          <span class="slider round"></span>
+        </label>
+        <br>
         Blue Team: <div id="blueTeamList"></div>
         Red Team:  <div id="redTeamList"></div>
         <button id="resetButton">Reset Game</button>

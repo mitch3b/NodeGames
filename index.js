@@ -76,7 +76,7 @@ io.on('connection', (socket) => {
         
       //TODO all the game info
       //Setup the player joining
-      socket.emit("InitForJoiningPlayer", { name: data.name, room: data.room, game: JSON.stringify(game, Set_toJSON)})
+      socket.emit("InitForJoiningPlayer", { name: data.name, color: game.getPlayerColor(data.name), room: data.room, game: JSON.stringify(game, Set_toJSON)})
       
       console.log("Successfully Added Player: " + data.name + " to game " + data.room);
       console.log("Currently " + game.getNumPlayers() + " players in game: " + data.room);
@@ -88,6 +88,44 @@ io.on('connection', (socket) => {
       }
       return value;
     }
+    
+    socket.on('noLongerASpyMaster', (data) => {
+      console.log("Removing spy master: " + data.name);
+      var game = games.get(data.room);
+      
+      io.to(data.room).emit('removeSpyMasterTag', {
+          name: data.name,
+      });
+    });
+    
+    socket.on('isNowASpyMaster', (data) => {
+      console.log("Adding spy master: " + data.name);
+      var game = games.get(data.room);
+      
+      io.to(data.room).emit('addSpyMasterTag', {
+          name: data.name,
+      });
+      
+      socket.emit("UpdateKey", { name: data.name, room: data.room, wordColors: JSON.stringify(game.getWordColors())})
+    });
+    
+    socket.on('noLongerAButtonPresser', (data) => {
+      console.log("Removing button presser: " + data.name);
+      var game = games.get(data.room);
+      
+      io.to(data.room).emit('removeButtonPresserTag', {
+          name: data.name,
+      });
+    });
+    
+    socket.on('isNowAButtonPresser', (data) => {
+      console.log("Adding button presser: " + data.name);
+      var game = games.get(data.room);
+      
+      io.to(data.room).emit('addButtonPresserTag', {
+          name: data.name,
+      });
+    });
     
      // #################################
      // In Game Events
