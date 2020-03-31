@@ -12,6 +12,20 @@ function getRandomWord() {
   return allWords[Math.floor(Math.random() * allWords.length)];
 }
 
+function getRandomWords(numWords) {
+    var result = new Array(numWords),
+        len = allWords.length,
+        taken = new Array(len);
+    if (numWords > len)
+        throw new RangeError("getRandom: more elements taken than available");
+    while (numWords--) {
+        var x = Math.floor(Math.random() * len);
+        result[numWords] = allWords[x in taken ? taken[x] : x];
+        taken[x] = --len in taken ? taken[len] : len;
+    }
+    return result;
+}
+
 class CodeNamesGame {  
   constructor(adminName) {
     console.log("Creating game for user: " + adminName);
@@ -20,18 +34,13 @@ class CodeNamesGame {
     this.redPlayers = new Set();
     this.words = new Array(GRID_SIZE);
     
+    var randomWords = getRandomWords(GRID_SIZE*GRID_SIZE);
+    
     for (var i = 0; i < this.words.length; i++) {
       this.words[i] = new Array(GRID_SIZE);
       
       for(var j = 0 ; j < this.words[i].length ; j++) {
-        var word;
-        do {
-          word = getRandomWord();
-          
-          //TODO tried '!' below but wouldn't exit... pretty sure could have dupes with this code
-        } while(this.words.includes(word));
-        
-        this.words[i][j] = word;
+        this.words[i][j] = randomWords[i*GRID_SIZE + j];
       }
     }
     this.currentTurn = (Math.random() >= 0.5) ? 'red' : 'blue';
@@ -154,6 +163,10 @@ class CodeNamesGame {
   
   getCurrentTurn() {
     return this.currentTurn;
+  }
+  
+  turnComplete() {
+    this.currentTurn = (this.currentTurn == 'red') ? 'blue' : 'red';
   }
   
   getNumRedsLeft() {

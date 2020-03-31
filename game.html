@@ -20,10 +20,10 @@
 			</div>
 			<div class="gameBoard" style="display: none;">
 				<h2 id="userHello"></h2>
-				Current Turn: <div id="currentTurn"></div>
+				Current Turn: <span id="currentTurn"></span><br>
         Remaining: 
-          <span style="float: left;" id="blueWordsLeft" class="blue">oasdofsojfi</span> 
-          <span style="float: right;" id="redWordsLeft" class="red">oasdofsojfi</span>
+          <span id="blueWordsLeft" class="blue">oasdofsojfi</span> - 
+          <span id="redWordsLeft" class="red">oasdofsojfi</span>
 				<table class="center">
 					<tr>
 						<td><button class="tile" id="button_00"></button></td>
@@ -61,9 +61,10 @@
             <td><button class="tile" id="button_44"></button></td>
 					</tr>
 				</table>
+        <button id="turnCompleteButton">Done Guessing</button>
         Blue Team: <div id="blueTeamList"></div>
         Red Team:  <div id="redTeamList"></div>
-        <button id="resetButton">Reset</button>
+        <button id="resetButton">Reset Game</button>
 			</div>
 		</div>
 		<script src="node_modules/jquery/dist/jquery.min.js"></script>

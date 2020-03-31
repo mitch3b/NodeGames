@@ -7,12 +7,15 @@
   let team;
   let game;
   let roomId;
+  let gameOver = false;
 
-  // const socket = io.connect('http://tic-tac-toe-realtime.herokuapp.com'),
-  const socket = io.connect('http://localhost:5000');
+  //let url = 'http://localhost:5000';
+  let url = 'https://mitch3a-code-names.herokuapp.com/';
+  console.log("Using url: " + url);
+  const socket = io.connect(url);
   
   function tileClickHandler() {
-    if(player == null || !player.isButtonPresser) {
+    if(player == null || !player.isButtonPresser || gameOver) {
       //This gets checked server side, but save a call if we can
       return;
     }
@@ -37,8 +40,18 @@
   $('#resetButton').on('click', () => {
     var result = confirm("Are you sure you want to restart?"); 
     if (result == true) { 
-        socket.emit('restartGame', { name, room: roomId });
+      gameOver = false;
+      socket.emit('restartGame', { name, room: roomId });
     } 
+  });
+   
+  $('#turnCompleteButton').on('click', () => {
+    if(player == null || !player.isButtonPresser) {
+      //This gets checked server side, but save a call if we can
+      return;
+    }
+    
+    socket.emit('turnComplete', { name, room: roomId }); 
   });
 
   class Player {
@@ -71,24 +84,11 @@
       $('#userHello').html(message);
       this.initBoard();
     }
-
-    // Announce the winner if the current client has won. 
-    // Broadcast this on the room to let the opponent know.
-    announceWinner() {
-      const message = `${player.getColor()} wins!`;
-      socket.emit('gameEnded', {
-        room: this.getRoomId(),
-        message,
-      });
-      alert(message);
-      location.reload();
-    }
-
-    // End the game if the other player won.
-    endGame(message) {
-      alert(message);
-      location.reload();
-    }
+  }
+  
+  function updateRemaining(numBluesLeft, numRedsLeft) {
+    $('#blueWordsLeft').text(numBluesLeft);
+    $('#redWordsLeft').text(numRedsLeft);
   }
   
   function colorTiles(wordColors) {
@@ -144,9 +144,8 @@
     game.displayBoard(message);
     addPlayerToTeam(data.name, data.color);
         
-    $('#blueWordsLeft').text(codeNamesGame.numBluesLeft);
     $('#currentTurn').text(codeNamesGame.currentTurn);
-    $('#redWordsLeft').text(codeNamesGame.numRedsLeft);
+    updateRemaining(codeNamesGame.numBluesLeft, codeNamesGame.numRedsLeft);
   });
 
   socket.on('joinGame', (data) => {
@@ -198,9 +197,8 @@
     game = new Game(data.room, codeNamesGame.words);
     game.displayBoard(message);
     
-    $('#blueWordsLeft').text(codeNamesGame.bluesLeft);
+    updateRemaining(codeNamesGame.numBluesLeft, codeNamesGame.numRedsLeft);
     $('#currentTurn').text(codeNamesGame.currentTurn);
-    $('#redWordsLeft').text(codeNamesGame.redsLeft);
     
     colorTiles(codeNamesGame.clicked);
     
@@ -216,12 +214,20 @@
     console.log("Server said tile was clicked: " + data.row + ", " + data.column + " type: " + data.type);
     reveal(data.row, data.column, data.type);
 
-    $('#blueWordsLeft').text(data.bluesLeft);
+    updateRemaining(data.bluesLeft, data.redsLeft);
     $('#currentTurn').text(data.currentTurn);
-    $('#redWordsLeft').text(data.redsLeft);
    
     if(data.winner != 'none') {
+      gameOver = true;
       alert("Congratulations to the " + ((data.winner == 'blue') ? "Blue" : "Red") + " team!");
     }
   });
+  
+  socket.on('turnUpdate', (data) => {
+    console.log("Server said turn was updated: " + data.currentTurn);
+
+    $('#currentTurn').text(data.currentTurn);
+  });
+  
+  
 }());

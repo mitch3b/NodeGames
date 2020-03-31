@@ -110,6 +110,19 @@ io.on('connection', (socket) => {
           winner: game.getWinner()
       });
     });
+    
+    socket.on('turnComplete', (data) => {
+      console.log("Turn complete (done guessing) for room: " + data.room);
+      var game = games.get(data.room);
+      game.turnComplete();
+      
+      // TODO verify its a button presser
+      io.to(data.room).emit('turnUpdate', {
+          currentTurn: game.getCurrentTurn(),
+      });
+    });
+    
+    
 });
 
 server.listen(process.env.PORT || 5000);
