@@ -9,17 +9,17 @@
   let roomId;
   let gameOver = false;
 
-  //let url = 'http://localhost:5000';
-  let url = 'https://mitch3a-code-names.herokuapp.com/';
+  let url = 'http://localhost:5000';
+  //let url = 'https://mitch3a-code-names.herokuapp.com/';
   console.log("Using url: " + url);
   const socket = io.connect(url);
-  
+
   function tileClickHandler() {
     if(player == null || !player.isButtonPresser || gameOver) {
       //This gets checked server side, but save a call if we can
       return;
     }
-    
+
     const row = parseInt(this.id.split('_')[1][0], 10);
     const column = parseInt(this.id.split('_')[1][1], 10);
 
@@ -36,58 +36,58 @@
       $(`#button_${i}${j}`).on('click', tileClickHandler);
     }
   }
-  
+
   $('#resetButton').on('click', () => {
-    var result = confirm("Are you sure you want to restart?"); 
-    if (result == true) { 
+    var result = confirm("Are you sure you want to restart?");
+    if (result == true) {
       gameOver = false;
       $('#buttonToucher').prop('checked', false);
       $('#spyMaster').prop('checked', false);
-      $(".show-words").attr('class','tile');  
+      $(".show-words").attr('class','tile');
       player.isButtonPresser = false;
       socket.emit('restartGame', { name, room: roomId });
     }
   });
-  
+
   $('#teamSelect').on('change', function() {
     console.log("Attempting team switch...");
-    socket.emit('attemptTeamSwitch', {  name: player.name, room: roomId, color: $('#teamSelect').val(), 
+    socket.emit('attemptTeamSwitch', {  name: player.name, room: roomId, color: $('#teamSelect').val(),
     isSpyMaster: $('#spyMaster').is(':checked'), isButtonToucher: $('#buttonToucher').is(':checked') });
   });
-   
+
   $('#turnCompleteButton').on('click', () => {
     if(player == null || !player.isButtonPresser) {
       //This gets checked server side, but save a call if we can
       return;
     }
-    
-    socket.emit('turnComplete', {  name: player.name, room: roomId }); 
+
+    socket.emit('turnComplete', {  name: player.name, room: roomId });
   });
-  
+
   $('#buttonToucher').change(
     function(){
       var isChecked = $(this).is(':checked')
       player.isButtonPresser = isChecked;
-      
+
       if(isChecked) {
-        socket.emit('isNowAButtonToucher', {  name: player.name, room: roomId }); 
+        socket.emit('isNowAButtonToucher', {  name: player.name, room: roomId });
       }
       else {
-        socket.emit('noLongerAButtonToucher', {  name: player.name, room: roomId }); 
+        socket.emit('noLongerAButtonToucher', {  name: player.name, room: roomId });
       }
     });
-    
+
   $('#spyMaster').change(
     function(){
       var isChecked = $(this).is(':checked')
       if(isChecked) {
         $(".tile").addClass("show-words");
-        socket.emit('isNowASpyMaster', {  name: player.name, room: roomId });         
+        socket.emit('isNowASpyMaster', {  name: player.name, room: roomId });
       }
       else {
         // Reset class to just tile
-        $(".show-words").attr('class','tile');   
-        socket.emit('noLongerASpyMaster', { name: player.name, room: roomId });  
+        $(".show-words").attr('class','tile');
+        socket.emit('noLongerASpyMaster', { name: player.name, room: roomId });
       }
     });
 
@@ -105,7 +105,7 @@
       this.board = [];
       this.words = words;
     }
-    
+
     initBoard() {
       for (let i = 0; i < this.words.length ; i++) {
         for (let j = 0; j < this.words[i].length; j++) {
@@ -113,7 +113,7 @@
         }
       }
     }
-    
+
     // Remove the menu from DOM, display the gameboard and greet the player.
     displayBoard() {
       $('.menu').css('display', 'none');
@@ -121,12 +121,12 @@
       this.initBoard();
     }
   }
-  
+
   function updateRemaining(numBluesLeft, numRedsLeft) {
     $('#blueWordsLeft').text(numBluesLeft);
     $('#redWordsLeft').text(numRedsLeft);
   }
-  
+
   function colorTiles(wordColors) {
     for (let i = 0; i < wordColors.length; i++) {
         for (let j = 0; j < wordColors[i].length; j++) {
@@ -134,7 +134,7 @@
         }
       }
   }
-  
+
   function reveal(row, column, type) {
     $(`#button_${row}${column}`).removeClass('red blue death neutral');
     $(`#button_${row}${column}`).addClass(type);
@@ -166,7 +166,7 @@
   });
 
   // ####################################
-  // Create/Join game incoming events (ack) 
+  // Create/Join game incoming events (ack)
   // ####################################
   socket.on('newGame', (data) => {
     codeNamesGame = JSON.parse(data.game);
@@ -175,7 +175,7 @@
     game.displayBoard();
     addPlayerToTeam(data.name, data.color);
     $('#teamSelect').val(data.color);
-        
+
     $('#currentTurn').text(codeNamesGame.currentTurn);
     updateRemaining(codeNamesGame.numBluesLeft, codeNamesGame.numRedsLeft);
   });
@@ -184,7 +184,7 @@
     $('#teamSelect').val(data.color);
     roomId = data.room;
   });
-  
+
   socket.on('playerJoined', (data) => {
     addPlayerToTeam(data.name, data.color);
   });
@@ -192,15 +192,15 @@
   function addPlayerToBlueTeam(name) {
     addPlayerToTeam(name, 'blue');
   }
-  
+
   function addPlayerToRedTeam(name) {
     addPlayerToTeam(name, 'red');
   }
-  
+
   function addPlayerToTeam(name, color) {
     //Remove from anywhere (in case prev on a different team)
     $('#' + name).remove();
-    
+
     //Add to right team
     var listToAdd = (color == 'blue') ? $('#blueTeamList') : $('#redTeamList');
 
@@ -209,41 +209,56 @@
     entry.appendChild(document.createTextNode(name));
     listToAdd.append(entry);
   };
-    
+
   // ####################################
   // Edit a game
   // ####################################
   function getNewWord(row, column) {
     socket.emit('getNewWord', { name, room: roomId, row: row, column: column });
   }
-  
+
   // ####################################
   // Join a game
   // ####################################
-  
+
   // ie if room doesn't exist or name already used in room
   socket.on('joinGameError', (data) => {
     alert(data.message);
   });
-  
+
   socket.on('InitForJoiningPlayer', (data) => {
     //TODO need to add spymasters/button touchers....
-    player = new Player(data.name);
-    roomId = data.room;
+    if(!player) {
+      player = new Player(data.name);
+      roomId = data.room;
+    }
+
+    // Reset class to just tile
+    $('#buttonToucher').prop('checked', false);
+    $('#spyMaster').prop('checked', false);
+    $(".show-words").attr('class','tile');
+    player.isButtonPresser = false;
+
     codeNamesGame = JSON.parse(data.game);
     game = new Game(data.room, codeNamesGame.words);
     game.displayBoard();
-    $('#teamSelect').val(data.color);
-    
+
+    if(codeNamesGame.bluePlayers.includes(player.name)) {
+      $('#teamSelect').val('blue');
+    }
+    else {
+      $('#teamSelect').val('red');
+    }
+
     updateRemaining(codeNamesGame.numBluesLeft, codeNamesGame.numRedsLeft);
     $('#currentTurn').text(codeNamesGame.currentTurn);
-    
+
     colorTiles(codeNamesGame.clicked);
-    
+
     codeNamesGame.bluePlayers.forEach(addPlayerToBlueTeam);
     codeNamesGame.redPlayers.forEach(addPlayerToRedTeam);
   });
-  
+
   socket.on('UpdateKey', (data) => {
     var wordColors = JSON.parse(data.wordColors);
     for (let i = 0; i < 5; i++) {
@@ -252,11 +267,11 @@
       }
     }
   });
-  
+
   socket.on('addButtonToucherTag', (data) => {
     addButtonToucherTag(data.name)
   });
-  
+
   function addButtonToucherTag(name) {
     console.log("Adding " + name + " as a button toucher");
     var entry = document.createElement("SPAN");
@@ -264,16 +279,16 @@
     entry.id = name + "-button-toucher-tag";
     $('#' + name).append(entry);
   }
-  
+
   socket.on('removeButtonToucherTag', (data) => {
     console.log("Removing " + data.name + " as a button toucher");
     $('#' + data.name + "-button-toucher-tag").remove();
   });
-  
+
   socket.on('addSpyMasterTag', (data) => {
     addSpyMasterTag(data.name)
   });
-  
+
   function addSpyMasterTag(name) {
     console.log("Adding " + name + " as a spymaster");
     var entry = document.createElement("SPAN");
@@ -281,20 +296,20 @@
     entry.id = name + "-spymastertag";
     $('#' + name).append(entry);
   }
-  
-  
+
+
   socket.on('removeSpyMasterTag', (data) => {
     console.log("Removing " + data.name + " as a spymaster");
     $('#' + data.name + "-spymastertag").remove();
   });
-  
+
   socket.on('teamSwitch', (data) => {
     console.log("Switching teams for  " + data.name);
     addPlayerToTeam(data.name, data.color );
     if(data.isSpyMaster) {
       addSpyMasterTag(data.name);;
     }
-    
+
     if(data.isButtonToucher) {
       addButtonToucherTag(data.name);
     }
@@ -309,18 +324,18 @@
 
     updateRemaining(data.bluesLeft, data.redsLeft);
     $('#currentTurn').text(data.currentTurn);
-   
+
     if(data.winner != 'none') {
       gameOver = true;
       alert("Congratulations to the " + ((data.winner == 'blue') ? "Blue" : "Red") + " team!");
     }
   });
-  
+
   socket.on('turnUpdate', (data) => {
     console.log("Server said turn was updated: " + data.currentTurn);
 
     $('#currentTurn').text(data.currentTurn);
   });
-  
-  
+
+
 }());
