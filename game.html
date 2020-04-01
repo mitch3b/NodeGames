@@ -19,47 +19,58 @@
 				<button id="join">Join Game</button>
 			</div>
 			<div class="gameBoard" style="display: none;">
-				Current Turn: <span id="currentTurn"></span><br>
+				Current Turn: <span class="info-panel" id="currentTurn"></span><br>
         Remaining: 
-          <span id="blueWordsLeft" class="blue">oasdofsojfi</span> - 
-          <span id="redWordsLeft" class="red">oasdofsojfi</span>
-				<table class="center">
-					<tr>
-						<td><button class="tile" id="button_00"></button></td>
-						<td><button class="tile" id="button_01"></button></td>
-						<td><button class="tile" id="button_02"></button></td>
-            <td><button class="tile" id="button_03"></button></td>
-            <td><button class="tile" id="button_04"></button></td>
-					</tr>
-					<tr>
-						<td><button class="tile" id="button_10"></button></td>
-						<td><button class="tile" id="button_11"></button></td>
-						<td><button class="tile" id="button_12"></button></td>
-            <td><button class="tile" id="button_13"></button></td>
-            <td><button class="tile" id="button_14"></button></td>
-					</tr>
-					<tr>
-						<td><button class="tile" id="button_20"></button></td>
-						<td><button class="tile" id="button_21"></button></td>
-						<td><button class="tile" id="button_22"></button></td>
-            <td><button class="tile" id="button_23"></button></td>
-            <td><button class="tile" id="button_24"></button></td>
-					</tr>
-          <tr>
-						<td><button class="tile" id="button_30"></button></td>
-						<td><button class="tile" id="button_31"></button></td>
-						<td><button class="tile" id="button_32"></button></td>
-            <td><button class="tile" id="button_33"></button></td>
-            <td><button class="tile" id="button_34"></button></td>
-					</tr>
-          <tr>
-						<td><button class="tile" id="button_40"></button></td>
-						<td><button class="tile" id="button_41"></button></td>
-						<td><button class="tile" id="button_42"></button></td>
-            <td><button class="tile" id="button_43"></button></td>
-            <td><button class="tile" id="button_44"></button></td>
-					</tr>
-				</table>
+          <span class="info-panel" id="blueWordsLeft" class="blue">oasdofsojfi</span> - 
+          <span class="info-panel" id="redWordsLeft" class="red">oasdofsojfi</span>
+        <div>
+          <div id=blueWordList style="float: left; width: 200px;">
+          This is text
+          </div>
+          <div style="float: left;">
+            <table class="center">
+              <tr>
+                <td><button class="tile" id="button_00"></button></td>
+                <td><button class="tile" id="button_01"></button></td>
+                <td><button class="tile" id="button_02"></button></td>
+                <td><button class="tile" id="button_03"></button></td>
+                <td><button class="tile" id="button_04"></button></td>
+              </tr>
+              <tr>
+                <td><button class="tile" id="button_10"></button></td>
+                <td><button class="tile" id="button_11"></button></td>
+                <td><button class="tile" id="button_12"></button></td>
+                <td><button class="tile" id="button_13"></button></td>
+                <td><button class="tile" id="button_14"></button></td>
+              </tr>
+              <tr>
+                <td><button class="tile" id="button_20"></button></td>
+                <td><button class="tile" id="button_21"></button></td>
+                <td><button class="tile" id="button_22"></button></td>
+                <td><button class="tile" id="button_23"></button></td>
+                <td><button class="tile" id="button_24"></button></td>
+              </tr>
+              <tr>
+                <td><button class="tile" id="button_30"></button></td>
+                <td><button class="tile" id="button_31"></button></td>
+                <td><button class="tile" id="button_32"></button></td>
+                <td><button class="tile" id="button_33"></button></td>
+                <td><button class="tile" id="button_34"></button></td>
+              </tr>
+              <tr>
+                <td><button class="tile" id="button_40"></button></td>
+                <td><button class="tile" id="button_41"></button></td>
+                <td><button class="tile" id="button_42"></button></td>
+                <td><button class="tile" id="button_43"></button></td>
+                <td><button class="tile" id="button_44"></button></td>
+              </tr>
+            </table>
+          </div>
+          <div id=redWordList style="float: left; width: 200px;">
+           This is text
+          </div>
+          <br style="clear: left;" />
+        </div>
         <button id="turnCompleteButton">Done Guessing</button>
         <br>
         Team: 
@@ -80,8 +91,8 @@
           <span class="slider round"></span>
         </label>
         <br>
-        Blue Team: <div id="blueTeamList"></div>
-        Red Team:  <div id="redTeamList"></div>
+        Blue Team: <ul id="blueTeamList"></ul>
+        Red Team:  <ul id="redTeamList"></ul>
         <button id="resetButton">Reset Game</button>
 			</div>
 		</div>

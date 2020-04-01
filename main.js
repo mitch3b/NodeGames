@@ -50,7 +50,9 @@
   });
   
   $('#teamSelect').on('change', function() {
-    alert( this.value );
+    console.log("Attempting team switch...");
+    socket.emit('attemptTeamSwitch', {  name: player.name, room: roomId, color: $('#teamSelect').val(), 
+    isSpyMaster: $('#spyMaster').is(':checked'), isButtonToucher: $('#buttonToucher').is(':checked') });
   });
    
   $('#turnCompleteButton').on('click', () => {
@@ -59,15 +61,20 @@
       return;
     }
     
-    socket.emit('turnComplete', { name, room: roomId }); 
+    socket.emit('turnComplete', {  name: player.name, room: roomId }); 
   });
   
   $('#buttonToucher').change(
     function(){
       var isChecked = $(this).is(':checked')
       player.isButtonPresser = isChecked;
-      //TODO the not a button pusher case
-      socket.emit('isNowAButtonPusher', { name, room: roomId }); 
+      
+      if(isChecked) {
+        socket.emit('isNowAButtonToucher', {  name: player.name, room: roomId }); 
+      }
+      else {
+        socket.emit('noLongerAButtonToucher', {  name: player.name, room: roomId }); 
+      }
     });
     
   $('#spyMaster').change(
@@ -75,12 +82,12 @@
       var isChecked = $(this).is(':checked')
       if(isChecked) {
         $(".tile").addClass("show-words");
-        socket.emit('isNowASpyMaster', { name, room: roomId });         
+        socket.emit('isNowASpyMaster', {  name: player.name, room: roomId });         
       }
       else {
         // Reset class to just tile
         $(".show-words").attr('class','tile');   
-        socket.emit('noLongerASpyMaster', { name, room: roomId });  
+        socket.emit('noLongerASpyMaster', { name: player.name, room: roomId });  
       }
     });
 
@@ -191,9 +198,16 @@
   }
   
   function addPlayerToTeam(name, color) {
+    //Remove from anywhere (in case prev on a different team)
+    $('#' + name).remove();
+    
+    //Add to right team
     var listToAdd = (color == 'blue') ? $('#blueTeamList') : $('#redTeamList');
 
-    listToAdd.append(document.createTextNode(name));
+    var entry = document.createElement('li');
+    entry.id = name;
+    entry.appendChild(document.createTextNode(name));
+    listToAdd.append(entry);
   };
     
   // ####################################
@@ -213,6 +227,7 @@
   });
   
   socket.on('InitForJoiningPlayer', (data) => {
+    //TODO need to add spymasters/button touchers....
     player = new Player(data.name);
     roomId = data.room;
     codeNamesGame = JSON.parse(data.game);
@@ -237,7 +252,53 @@
       }
     }
   });
-   
+  
+  socket.on('addButtonToucherTag', (data) => {
+    addButtonToucherTag(data.name)
+  });
+  
+  function addButtonToucherTag(name) {
+    console.log("Adding " + name + " as a button toucher");
+    var entry = document.createElement("SPAN");
+    entry.appendChild(document.createTextNode(" (Toucher)"));
+    entry.id = name + "-button-toucher-tag";
+    $('#' + name).append(entry);
+  }
+  
+  socket.on('removeButtonToucherTag', (data) => {
+    console.log("Removing " + data.name + " as a button toucher");
+    $('#' + data.name + "-button-toucher-tag").remove();
+  });
+  
+  socket.on('addSpyMasterTag', (data) => {
+    addSpyMasterTag(data.name)
+  });
+  
+  function addSpyMasterTag(name) {
+    console.log("Adding " + name + " as a spymaster");
+    var entry = document.createElement("SPAN");
+    entry.appendChild(document.createTextNode(" (SpyMaster)"));
+    entry.id = name + "-spymastertag";
+    $('#' + name).append(entry);
+  }
+  
+  
+  socket.on('removeSpyMasterTag', (data) => {
+    console.log("Removing " + data.name + " as a spymaster");
+    $('#' + data.name + "-spymastertag").remove();
+  });
+  
+  socket.on('teamSwitch', (data) => {
+    console.log("Switching teams for  " + data.name);
+    addPlayerToTeam(data.name, data.color );
+    if(data.isSpyMaster) {
+      addSpyMasterTag(data.name);;
+    }
+    
+    if(data.isButtonToucher) {
+      addButtonToucherTag(data.name);
+    }
+  });
 
   // ####################################
   // Game in progress TODO

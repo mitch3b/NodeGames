@@ -123,6 +123,11 @@ class CodeNamesGame {
     }
   }
   
+  removePlayer(name) {
+    this.redPlayers.delete(name);
+    this.bluePlayers.delete(name);
+  }
+  
   makeGuess(row, column) {
     let result = this.wordColors[row][column];
     this.clicked[row][column] = result;

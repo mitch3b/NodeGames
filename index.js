@@ -17,13 +17,19 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
+    //Scope of just the current user
+    var userId;
+    var roomId;
+    
     // #################################
     // Create a new game room and notify the creator of game.
      // #################################
     socket.on('createGame', (data) => {
       var game = new Game(data.name);
+      userId = data.name;
       
       var roomName = `room-${++rooms}`
+      roomId = roomName;
       socket.join(roomName);
       socket.emit('newGame', { name: data.name, room: roomName, color: game.getPlayerColor(data.name), game: JSON.stringify(game, Set_toJSON)});
       games.set(roomName,  game);
@@ -66,8 +72,9 @@ io.on('connection', (socket) => {
         return;
       }
       
+      roomId = data.room;
       game.addPlayer(data.name);
-      
+      userId = data.name;
       socket.join(data.room);
       socket.broadcast.to(data.room).emit('playerJoined', {
         name: data.name,
@@ -109,23 +116,52 @@ io.on('connection', (socket) => {
       socket.emit("UpdateKey", { name: data.name, room: data.room, wordColors: JSON.stringify(game.getWordColors())})
     });
     
-    socket.on('noLongerAButtonPresser', (data) => {
-      console.log("Removing button presser: " + data.name);
+    socket.on('noLongerASpyMaster', (data) => {
+      console.log("Removing spy master: " + data.name);
       var game = games.get(data.room);
       
-      io.to(data.room).emit('removeButtonPresserTag', {
+      io.to(data.room).emit('removeSpyMasterTag', {
+          name: data.name,
+      });
+    });
+            
+    socket.on('isNowAButtonToucher', (data) => {
+      console.log("Adding button toucher: " + data.name);
+      
+      io.to(data.room).emit('addButtonToucherTag', {
           name: data.name,
       });
     });
     
-    socket.on('isNowAButtonPresser', (data) => {
-      console.log("Adding button presser: " + data.name);
-      var game = games.get(data.room);
+    socket.on('noLongerAButtonToucher', (data) => {
+      console.log("Removing button toucher: " + data.name);
       
-      io.to(data.room).emit('addButtonPresserTag', {
+      io.to(data.room).emit('removeButtonToucherTag', {
           name: data.name,
       });
     });
+    
+    socket.on('attemptTeamSwitch', (data) => {
+      console.log("Attempting team switch: " + data.name + " to color: " + data.color);
+      var game = games.get(data.room);
+      
+      io.to(data.room).emit('teamSwitch', data);
+    });
+    
+    socket.on('disconnect', function() {
+      try {
+        var game = games.get(roomId);
+        game.removePlayer(userId);
+        
+        if(game.getNumPlayers() < 1) {
+          console.log("Player " + userId + " left game " + roomId + ". No players left. Deleting game");
+          
+          games.delete(game);
+        }
+      } catch(err) {
+        console.log("Issue removing player: " + err.message);
+      }
+    })
     
      // #################################
      // In Game Events
