@@ -1,14 +1,21 @@
 (function init() {
-  const BLUE_TEAM = 'X';
-  const P2_COLOR = 'O';
-  const ROLE_CLUE_GIVER = "CLUE_GIVER";
-  const ROLE_GUESSER = "GUESSER";
   let player;
   let team;
   let game;
   let roomId;
   let gameOver = false;
 
+  /*
+   TODOs:
+   2. enforce only toucher of that color can touch on their turn
+   3. Add error messages when something "untouchable" is touched
+   4. add word lists for spymaster
+   5. fix design
+   6. Allow refreshing of certain tiles (aka setup mode)
+   7. Maybe add an elapsed time
+  */
+
+  //TODO make this configurable...
   //let url = 'http://localhost:5000';
   let url = 'https://mitch3a-code-names.herokuapp.com/';
   console.log("Using url: " + url);
@@ -172,17 +179,13 @@
     codeNamesGame = JSON.parse(data.game);
     game = new Game(data.room, codeNamesGame.words);
     roomId = data.room;
+    $('#inviteUrl').text(url + roomId);
     game.displayBoard();
     addPlayerToTeam(data.name, data.color);
     $('#teamSelect').val(data.color);
 
     $('#currentTurn').text(codeNamesGame.currentTurn);
     updateRemaining(codeNamesGame.numBluesLeft, codeNamesGame.numRedsLeft);
-  });
-
-  socket.on('joinGame', (data) => {
-    $('#teamSelect').val(data.color);
-    roomId = data.room;
   });
 
   socket.on('playerJoined', (data) => {
@@ -227,10 +230,10 @@
   });
 
   socket.on('InitForJoiningPlayer', (data) => {
-    //TODO need to add spymasters/button touchers....
     if(!player) {
       player = new Player(data.name);
       roomId = data.room;
+      $('#inviteUrl').text(url + roomId);
     }
 
     // Reset class to just tile

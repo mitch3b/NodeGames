@@ -19,9 +19,10 @@
 				<button id="join">Join Game</button>
 			</div>
 			<div class="gameBoard" style="display: none;">
+				Invite your friends: <span id="inviteUrl"></span><br>
 				Current Turn: <span class="info-panel" id="currentTurn"></span><br>
-        Remaining: 
-          <span class="info-panel" id="blueWordsLeft" class="blue">oasdofsojfi</span> - 
+        Remaining:
+          <span class="info-panel" id="blueWordsLeft" class="blue">oasdofsojfi</span> -
           <span class="info-panel" id="redWordsLeft" class="red">oasdofsojfi</span>
         <div>
           <div id=blueWordList style="float: left; width: 200px;">
@@ -73,18 +74,18 @@
         </div>
         <button id="turnCompleteButton">Done Guessing</button>
         <br>
-        Team: 
+        Team:
         <select id="teamSelect">
           <option value="blue">Blue</option>
           <option value="red">Red</option>
         </select>
-        
-        Is Spy Master: 
+
+        Is Spy Master:
         <label class="switch">
           <input type="checkbox" id="spyMaster">
           <span class="slider round"></span>
         </label>
-        
+
         Can Push Buttons:
         <label class="switch">
           <input type="checkbox" id="buttonToucher">
