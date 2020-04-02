@@ -43,14 +43,16 @@
   color: darkblue;
   font-weight: bold;
   text-decoration: underline;
-  border-color: lightblue;
+  border-width: thick;
+  border-color: blue;
 }
 
 .key-red{
   color: darkred;
   font-weight: bold;
   text-decoration: underline;
-  border-color: lightcoral;
+  border-width: thick;
+  border-color: red;
 }
 
 .key-death{
@@ -62,9 +64,10 @@
 }
 
 .key-neutral{
-  color: darkgoldenrod;
+  color: black;
   font-weight: bold;
-  border-color: khaki
+  border-width: thick;
+  border-color: white
 }
 
 .info-panel {

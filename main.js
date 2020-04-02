@@ -192,7 +192,7 @@
     codeNamesGame = JSON.parse(data.game);
     game = new Game(data.room, codeNamesGame.words);
     roomId = data.room;
-    $('#inviteUrl').text(url + roomId);
+    $('#inviteUrl').text(url + "?room=" + roomId);
     game.displayBoard();
     addPlayerToTeam(data.name, data.color);
     $('#teamSelect').val(data.color);
