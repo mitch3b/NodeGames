@@ -7,9 +7,6 @@
 
   /*
    TODOs:
-   2. enforce only toucher of that color can touch on their turn
-   3. Add error messages when something "untouchable" is touched
-   4. add word lists for spymaster
    5. fix design
    6. Allow refreshing of certain tiles (aka setup mode)
    7. Maybe add an elapsed time
@@ -22,10 +19,21 @@
   const socket = io.connect(url);
 
   function tileClickHandler() {
-    if(player == null || !player.isButtonPresser || gameOver) {
+    if(player == null || gameOver) {
       //This gets checked server side, but save a call if we can
       return;
     }
+    
+    if (!$('#buttonToucher').is(':checked')) {
+      alert("You're not a designated button toucher. Flip the switch below to change that");
+      return;
+    }
+    
+    if($('#currentTurn').text() != $('#teamSelect').val()) {
+      alert("Not your team's turn");
+      return;
+    }
+      
 
     const row = parseInt(this.id.split('_')[1][0], 10);
     const column = parseInt(this.id.split('_')[1][1], 10);
@@ -93,7 +101,12 @@
       }
       else {
         // Reset class to just tile
-        $(".show-words").attr('class','tile');
+        $(".show-words").removeClass('show-words');
+        $(".tile").removeClass (function (index, className) {
+          return (className.match (/(^|\s)key-\S+/g) || []).join(' ');
+        });
+        $('#blueWordList').empty();
+        $('#redWordList').empty();
         socket.emit('noLongerASpyMaster', { name: player.name, room: roomId });
       }
     });
@@ -137,7 +150,7 @@
   function colorTiles(wordColors) {
     for (let i = 0; i < wordColors.length; i++) {
         for (let j = 0; j < wordColors[i].length; j++) {
-          reveal(j, i, wordColors[i][j]);
+          reveal(i, j, wordColors[i][j]);
         }
       }
   }
@@ -269,6 +282,32 @@
         $(`#button_${i}${j}`).addClass("key-" + wordColors[i][j]);
       }
     }
+    //mitchtodo
+    var flippedBlueWords = $('.blue.tile').map(function() { return this.innerHTML; });
+    var blueWords = $('.key-blue').map(function() { return this.innerHTML; });
+    for(let i = 0 ; i < blueWords.length ; i++) {
+      var listItem = document.createElement("LI");
+      listItem.appendChild(document.createTextNode(blueWords[i]));
+      listItem.classList.add(blueWords[i] + "-wordList");
+      $('#blueWordList').append(listItem);
+      
+      if($.inArray(blueWords[i], flippedBlueWords) != -1) {
+        listItem.classList.add("strikethrough");
+      }
+    }
+    
+    var flippedRedWords = $('.red.tile').map(function() { return this.innerHTML; });
+    var redWords = $('.key-red').map(function() { return this.innerHTML; });
+    for(let i = 0 ; i < redWords.length ; i++) {
+      var listItem = document.createElement("LI");
+      listItem.appendChild(document.createTextNode(redWords[i]));
+      listItem.classList.add(redWords[i] + "-wordList");
+      $('#redWordList').append(listItem);
+      
+      if($.inArray(redWords[i], flippedRedWords) != -1) {
+        listItem.classList.add("strikethrough");
+      }
+    }
   });
 
   socket.on('addButtonToucherTag', (data) => {
@@ -324,6 +363,9 @@
   socket.on('tileClicked', (data) => {
     console.log("Server said tile was clicked: " + data.row + ", " + data.column + " type: " + data.type);
     reveal(data.row, data.column, data.type);
+    
+    word = $(`#button_${data.row}${data.column}`).html();
+    $('.' + word + "-wordList").addClass("strikethrough");
 
     updateRemaining(data.bluesLeft, data.redsLeft);
     $('#currentTurn').text(data.currentTurn);

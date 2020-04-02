@@ -1,13 +1,17 @@
 .tile{
 	width: 140px;
 	height: 80px;
-	font-size: 15px;
+	font-size: 13px;
 	font-family: Helvetica;
   padding: 0px;
 }
 
 .button {
   text-align: center;
+}
+
+.strikethrough {
+  text-decoration: line-through;
 }
 
 .gameBoard{
