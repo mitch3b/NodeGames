@@ -190,7 +190,6 @@ io.on('connection', (socket) => {
       var game = games.get(data.room);
       game.turnComplete();
 
-      // TODO verify its a button presser
       io.to(data.room).emit('turnUpdate', {
           currentTurn: game.getCurrentTurn(),
       });

@@ -71,8 +71,18 @@
   });
 
   $('#turnCompleteButton').on('click', () => {
-    if(player == null || !player.isButtonPresser) {
+    if(player == null || gameOver) {
       //This gets checked server side, but save a call if we can
+      return;
+    }
+    
+    if (!$('#buttonToucher').is(':checked')) {
+      alert("You're not a designated button toucher. Flip the switch below to change that");
+      return;
+    }
+    
+    if($('#currentTurn').text() != $('#teamSelect').val()) {
+      alert("Not your team's turn");
       return;
     }
 
@@ -255,6 +265,9 @@
     $(".show-words").attr('class','tile');
     player.isButtonPresser = false;
 
+    $('#blueWordList').empty();
+    $('#redWordList').empty();
+        
     codeNamesGame = JSON.parse(data.game);
     game = new Game(data.room, codeNamesGame.words);
     game.displayBoard();
