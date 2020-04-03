@@ -21,13 +21,16 @@
 			<div class="gameBoard" style="display: none;">
 				Invite your friends: <span id="inviteUrl"></span><br>
 				Current Turn: <span class="info-panel" id="currentTurn"></span><br>
-        Remaining:
-          <span class="info-panel" id="blueWordsLeft" class="blue">oasdofsojfi</span> -
-          <span class="info-panel" id="redWordsLeft" class="red">oasdofsojfi</span>
+
         <div>
-          <ul id=blueWordList style="float: left; width: 100px;" class="blue">
+          <ul id=blueWordList class="blue custom-list">
           </ul>
           <div style="float: left;">
+            <div class="center">
+            Remaining: <br>
+              <span class="info-panel" id="blueWordsLeft" class="blue">oasdofsojfi</span> -
+              <span class="info-panel" id="redWordsLeft" class="red">oasdofsojfi</span>
+            </div>
             <table class="center">
               <tr>
                 <td><button class="tile" id="button_00"></button></td>
@@ -65,12 +68,12 @@
                 <td><button class="tile" id="button_44"></button></td>
               </tr>
             </table>
+            <button id="turnCompleteButton" class="done-guessing-button" >Done Guessing</button>
           </div>
-          <ul id=redWordList style="float: left; width: 100px;" class="red">
+          <ul id=redWordList class="red custom-list">
           </ul>
           <br style="clear: left;" />
         </div>
-        <button id="turnCompleteButton">Done Guessing</button>
         <br>
         Team:
         <select id="teamSelect">
