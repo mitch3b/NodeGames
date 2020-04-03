@@ -39,6 +39,15 @@
   text-align: center;
 }
 
+.blue-score{
+  background-color: lightblue;
+}
+
+.red-score{
+  background-color: lightcoral;
+}
+
+
 .blue{
   background-color: lightblue;
 }
