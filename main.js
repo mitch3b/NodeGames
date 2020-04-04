@@ -288,6 +288,15 @@
     codeNamesGame.redPlayers.forEach(addPlayerToRedTeam);
   });
 
+  function getClassSafeName(word){
+    return word.replace(/[^a-z0-9]/g, function(s) {
+        var c = s.charCodeAt(0);
+        if (c == 32) return '-';
+        if (c >= 65 && c <= 90) return '_' + s.toLowerCase();
+        return '__' + ('000' + c.toString(16)).slice(-4);
+    });
+  }
+  
   socket.on('UpdateKey', (data) => {
     var wordColors = JSON.parse(data.wordColors);
     for (let i = 0; i < 5; i++) {
@@ -301,7 +310,7 @@
     for(let i = 0 ; i < blueWords.length ; i++) {
       var listItem = document.createElement("LI");
       listItem.appendChild(document.createTextNode(blueWords[i]));
-      listItem.classList.add(blueWords[i] + "-wordList");
+      listItem.classList.add(getClassSafeName(blueWords[i]) + "-wordList");
       $('#blueWordList').append(listItem);
       
       if($.inArray(blueWords[i], flippedBlueWords) != -1) {
@@ -314,7 +323,7 @@
     for(let i = 0 ; i < redWords.length ; i++) {
       var listItem = document.createElement("LI");
       listItem.appendChild(document.createTextNode(redWords[i]));
-      listItem.classList.add(redWords[i] + "-wordList");
+      listItem.classList.add(getClassSafeName(redWords[i]) + "-wordList");
       $('#redWordList').append(listItem);
       
       if($.inArray(redWords[i], flippedRedWords) != -1) {
@@ -378,7 +387,7 @@
     reveal(data.row, data.column, data.type);
     
     word = $(`#button_${data.row}${data.column}`).html();
-    $('.' + word + "-wordList").addClass("strikethrough");
+    $('.' + getClassSafeName(word) + "-wordList").addClass("strikethrough");
 
     updateRemaining(data.bluesLeft, data.redsLeft);
     $('#currentTurn').text(data.currentTurn);

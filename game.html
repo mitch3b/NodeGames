@@ -23,7 +23,11 @@
 				Current Turn: <span class="info-panel" id="currentTurn"></span><br>
 
         <div>
-          <ul id=blueWordList class="blue custom-list">
+          <div class="side-panel">
+            <ul id="blueWordList" class="blue custom-list"></ul>
+            Blue Team
+            <ul id="blueTeamList" class="custom-list"></ul>
+          </div>
           </ul>
           <div style="float: left;">
             <div class="center">
@@ -70,8 +74,12 @@
             </table>
             <button id="turnCompleteButton" class="done-guessing-button" >Done Guessing</button>
           </div>
-          <ul id=redWordList class="red custom-list">
-          </ul>
+          <div class="side-panel">
+            <ul id=redWordList class="red custom-list">
+            </ul>
+            Red Team  
+            <ul id="redTeamList" class="custom-list"></ul>
+          </div>
           <br style="clear: left;" />
         </div>
         <br>
@@ -93,8 +101,7 @@
           <span class="slider round"></span>
         </label>
         <br>
-        Blue Team: <ul id="blueTeamList"></ul>
-        Red Team:  <ul id="redTeamList"></ul>
+        
         <button id="resetButton">Reset Game</button>
 			</div>
 		</div>

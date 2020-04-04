@@ -24,14 +24,22 @@
 }
 
 .gameBoard{
-	display: none;
+	display: inline-block;
+  white-space: nowrap;
+}
+
+.custom-list-div{
+  
 }
 
 .custom-list{
-  float: left; 
-  width: 100px; 
   list-style-type: none; 
   padding-inline-start: 20px;
+}
+
+.side-panel{
+  float: left; 
+  width: 170px; 
 }
 
 .center{
