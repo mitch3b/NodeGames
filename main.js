@@ -13,8 +13,8 @@
   */
 
   //TODO make this configurable...
-  //let url = 'http://localhost:5000';
-  let url = 'https://mitch3a-code-names.herokuapp.com/';
+  let url = 'http://localhost:5000';
+  //let url = 'https://mitch3a-code-names.herokuapp.com/';
   console.log("Using url: " + url);
   const socket = io.connect(url);
 
@@ -60,7 +60,7 @@
       $('#spyMaster').prop('checked', false);
       $(".show-words").attr('class','tile');
       player.isButtonPresser = false;
-      socket.emit('restartGame', { name, room: roomId });
+      socket.emit('restartGame', { name, room: roomId, isDirty: $('#isDirtyCheckboxRestart').is(':checked')});
     }
   });
 
@@ -180,7 +180,7 @@
       alert('Please enter your name.');
       return;
     }
-    socket.emit('createGame', { name });
+    socket.emit('createGame', { name: name, isDirty: $('#isDirtyCheckboxCreate').is(':checked')});
     player = new Player(name);
   });
 

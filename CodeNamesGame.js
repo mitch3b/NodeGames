@@ -1,9 +1,14 @@
 const GRID_SIZE = 5;
 
 const allWords = [];
+const allDirtyWords = [];
 
 require('fs').readFileSync('wordList.txt', 'utf-8').split(/\r?\n/).forEach(function(line){
   allWords.push(line);
+})
+
+require('fs').readFileSync('undercoverWordList.txt', 'utf-8').split(/\r?\n/).forEach(function(line){
+  allDirtyWords.push(line);
 })
 
 console.log("Read in " + allWords.length + " words.");
@@ -12,15 +17,15 @@ function getRandomWord() {
   return allWords[Math.floor(Math.random() * allWords.length)];
 }
 
-function getRandomWords(numWords) {
+function getRandomWords(numWords, wordList) {
     var result = new Array(numWords),
-        len = allWords.length,
+        len = wordList.length,
         taken = new Array(len);
     if (numWords > len)
         throw new RangeError("getRandom: more elements taken than available");
     while (numWords--) {
         var x = Math.floor(Math.random() * len);
-        result[numWords] = allWords[x in taken ? taken[x] : x];
+        result[numWords] = wordList[x in taken ? taken[x] : x];
         taken[x] = --len in taken ? taken[len] : len;
     }
     return result;
@@ -34,16 +39,16 @@ class CodeNamesGame {
     this.redPlayers = new Set();
   }
 
-  reset() {
-    this.init();
+  reset(isDirty) {
+    this.init(isDirty);
   }
 
-  init() {
+  init(isDirty) {
     this.spyMasters = new Set();
     this.buttonTouchers = new Set();
     this.words = new Array(GRID_SIZE);
 
-    var randomWords = getRandomWords(GRID_SIZE*GRID_SIZE);
+    var randomWords = getRandomWords(GRID_SIZE*GRID_SIZE, (isDirty ? allDirtyWords : allWords));
 
     for (var i = 0; i < this.words.length; i++) {
       this.words[i] = new Array(GRID_SIZE);

@@ -46,7 +46,7 @@ io.on('connection', (socket) => {
       }
       
       var game = new Game(data.name);
-      game.init();
+      game.init(data.isDirty);
       userId = data.name;
 
       var roomName = `room-${++rooms}`
@@ -60,7 +60,7 @@ io.on('connection', (socket) => {
 
     socket.on('restartGame', (data) => {
       var game = games.get(data.room);
-      game.reset();
+      game.reset(data.isDirty);
 
       io.emit("InitForJoiningPlayer", { name: data.name, room: data.room, game: JSON.stringify(game, Set_toJSON)})
       games.set(data.room,  game);
