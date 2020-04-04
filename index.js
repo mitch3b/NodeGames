@@ -16,6 +16,20 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'game.html'));
 });
 
+function isAlphaNumeric(str) {
+  var code, i, len;
+
+  for (i = 0, len = str.length; i < len; i++) {
+    code = str.charCodeAt(i);
+    if (!(code > 47 && code < 58) && // numeric (0-9)
+        !(code > 64 && code < 91) && // upper alpha (A-Z)
+        !(code > 96 && code < 123)) { // lower alpha (a-z)
+      return false;
+    }
+  }
+  return true;
+};
+
 io.on('connection', (socket) => {
     //Scope of just the current user
     var userId;
@@ -25,6 +39,12 @@ io.on('connection', (socket) => {
     // Create a new game room and notify the creator of game.
      // #################################
     socket.on('createGame', (data) => {
+      if(!isAlphaNumeric(data.name)) {
+        console.log("Can't create game with invalid username: " + data.name);
+        socket.emit('joinGameError', { message: 'Username must be only letters and numbers' });
+        return;
+      }
+      
       var game = new Game(data.name);
       game.init();
       userId = data.name;
@@ -52,6 +72,12 @@ io.on('connection', (socket) => {
     // #################################
     socket.on('attemptToJoinGame', function (data) {
       console.log("Adding Player: " + data.name + " to game " + data.room);
+      
+      if(!isAlphaNumeric(data.name)) {
+        console.log("Can't create game with invalid username: " + data.name);
+        socket.emit('joinGameError', { message: 'Username must be only letters and numbers' });
+        return;
+      }
 
       var room = io.nsps['/'].adapter.rooms[data.room];
       if (!room) {
@@ -157,6 +183,11 @@ io.on('connection', (socket) => {
           console.log("Player " + userId + " left game " + roomId + ". No players left. Deleting game");
 
           games.delete(game);
+        }
+        else {
+          io.to(roomId).emit('playerLeft', {
+            name: userId,
+          });
         }
       } catch(err) {
         console.log("Issue removing player: " + err.message);

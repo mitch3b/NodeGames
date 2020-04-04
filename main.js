@@ -13,8 +13,8 @@
   */
 
   //TODO make this configurable...
-  //let url = 'http://localhost:5000';
-  let url = 'https://mitch3a-code-names.herokuapp.com/';
+  let url = 'http://localhost:5000';
+  //let url = 'https://mitch3a-code-names.herokuapp.com/';
   console.log("Using url: " + url);
   const socket = io.connect(url);
 
@@ -214,6 +214,14 @@
   socket.on('playerJoined', (data) => {
     addPlayerToTeam(data.name, data.color);
   });
+  
+  socket.on('playerLeft', (data) => {
+    removePlayer(data.name);
+  });
+  
+  function removePlayer(name) {
+    $('#' + name).remove();
+  }
 
   function addPlayerToBlueTeam(name) {
     addPlayerToTeam(name, 'blue');
@@ -224,8 +232,8 @@
   }
 
   function addPlayerToTeam(name, color) {
-    //Remove from anywhere (in case prev on a different team)
-    $('#' + name).remove();
+    //Make sure name isn't lingering anywhere else
+    removePlayer(name);
 
     //Add to right team
     var listToAdd = (color == 'blue') ? $('#blueTeamList') : $('#redTeamList');
@@ -286,6 +294,8 @@
 
     codeNamesGame.bluePlayers.forEach(addPlayerToBlueTeam);
     codeNamesGame.redPlayers.forEach(addPlayerToRedTeam);
+    codeNamesGame.spyMasters.forEach(addSpyMasterTag);
+    codeNamesGame.buttonTouchers.forEach(addButtonToucherTag);
   });
 
   function getClassSafeName(word){

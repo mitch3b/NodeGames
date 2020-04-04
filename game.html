@@ -10,12 +10,12 @@
 			<div class="menu">
 				<h1>Code Names</h1>
 				<h4>Create a new Game</h4>
-				<input type="text" name="name" id="nameNew" placeholder="Enter your name" required>
+				<input type="text" name="name" id="nameNew" placeholder="Enter your name"  onkeypress='return ((event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122) || (e.keyCode >= 48 && e.keyCode <= 57))' required>
 				<button id="new">New Game</button>
 				<br><br>
 				<h4>Join an existing game</h4>
-				<input type="text" name="name" id="nameJoin" placeholder="Enter your name" required>
-				<input type="text" name="room" id="room" placeholder="Enter Game ID" required>
+				<input type="text" name="name" id="nameJoin" placeholder="Enter your name" onkeypress='return ((event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122) || (e.keyCode >= 48 && e.keyCode <= 57))' required>
+				<input type="text" name="room" id="room" placeholder="Enter Game ID" onkeypress='return ((event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122) || (e.keyCode >= 48 && e.keyCode <= 57))' required>
 				<button id="join">Join Game</button>
 			</div>
 			<div class="gameBoard" style="display: none;">
