@@ -15,6 +15,11 @@
   padding: 0px;
 }
 
+.role-icon{
+  height: .8em;
+  padding-left: 3px;
+}
+
 .button {
   text-align: center;
 }

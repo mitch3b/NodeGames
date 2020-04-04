@@ -338,8 +338,9 @@
 
   function addButtonToucherTag(name) {
     console.log("Adding " + name + " as a button toucher");
-    var entry = document.createElement("SPAN");
-    entry.appendChild(document.createTextNode(" (Toucher)"));
+    var entry = document.createElement('img'); 
+    entry.src = 'images/fingerPoint.png'; 
+    entry.classList.add("role-icon");
     entry.id = name + "-button-toucher-tag";
     $('#' + name).append(entry);
   }
@@ -355,8 +356,11 @@
 
   function addSpyMasterTag(name) {
     console.log("Adding " + name + " as a spymaster");
-    var entry = document.createElement("SPAN");
-    entry.appendChild(document.createTextNode(" (SpyMaster)"));
+    //var entry = document.createElement("SPAN");
+    //entry.appendChild(document.createTextNode(" (SpyMaster)"));
+    var entry = document.createElement('img'); 
+    entry.src = 'images/key.png'; 
+    entry.classList.add("role-icon");
     entry.id = name + "-spymastertag";
     $('#' + name).append(entry);
   }
