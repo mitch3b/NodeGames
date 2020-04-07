@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
       var game = games.get(data.room);
       game.reset(data.isDirty);
 
-      io.emit("InitForJoiningPlayer", { name: data.name, room: data.room, game: JSON.stringify(game, Set_toJSON)})
+      io.in(data.room).emit("InitForJoiningPlayer", { name: data.name, room: data.room, game: JSON.stringify(game, Set_toJSON)})
       games.set(data.room,  game);
       console.log("Restarting Game: " + data.room + " requested by " + data.name);
     });
