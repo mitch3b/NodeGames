@@ -59,12 +59,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('restartGame', (data) => {
-      var game = games.get(data.room);
+      var game = games.get(roomId);
       game.reset(data.isDirty);
 
-      io.in(data.room).emit("InitForJoiningPlayer", { name: data.name, room: data.room, game: JSON.stringify(game, Set_toJSON)})
-      games.set(data.room,  game);
-      console.log("Restarting Game: " + data.room + " requested by " + data.name);
+      io.in(roomId).emit("InitForJoiningPlayer", { name: data.name, room: data.room, game: JSON.stringify(game, Set_toJSON)})
+      games.set(roomId,  game);
+      console.log("Restarting Game: " + roomId + " requested by " + data.name);
     });
 
     // #################################
@@ -103,18 +103,18 @@ io.on('connection', (socket) => {
       roomId = data.room;
       game.addPlayer(data.name);
       userId = data.name;
-      socket.join(data.room);
-      socket.broadcast.to(data.room).emit('playerJoined', {
-        name: data.name,
+      socket.join(roomId);
+      socket.broadcast.to(roomId).emit('playerJoined', {
+        name: userId,
         color: game.getPlayerColor(data.name)
       });
 
       //TODO all the game info
       //Setup the player joining
-      socket.emit("InitForJoiningPlayer", { name: data.name, color: game.getPlayerColor(data.name), room: data.room, game: JSON.stringify(game, Set_toJSON)})
+      socket.emit("InitForJoiningPlayer", {color: game.getPlayerColor(data.name), room: data.room, game: JSON.stringify(game, Set_toJSON)})
 
-      console.log("Successfully Added Player: " + data.name + " to game " + data.room);
-      console.log("Currently " + game.getNumPlayers() + " players in game: " + data.room);
+      console.log("Successfully Added Player: " + data.name + " to game " + roomId);
+      console.log("Currently " + game.getNumPlayers() + " players in game: " + roomId);
     });
 
     function Set_toJSON(key, value) {
@@ -125,53 +125,52 @@ io.on('connection', (socket) => {
     }
 
     socket.on('noLongerASpyMaster', (data) => {
-      console.log("Removing spy master: " + data.name);
-      var game = games.get(data.room);
-      game.removeSpyMaster(data.name);
+      console.log("Removing spy master: " + userId);
+      var game = games.get(roomId);
+      game.removeSpyMaster(userId);
 
-      io.to(data.room).emit('removeSpyMasterTag', {
-          name: data.name,
+      io.to(roomId).emit('removeSpyMasterTag', {
+          name: userId,
       });
     });
 
     socket.on('isNowASpyMaster', (data) => {
-      console.log("Adding spy master: " + data.name);
-      var game = games.get(data.room);
-      game.addSpyMaster(data.name);
-
-      io.to(data.room).emit('addSpyMasterTag', {
-          name: data.name,
+      console.log("Adding spy master: " + userId);
+      var game = games.get(roomId);
+      game.addSpyMaster(data.userId);
+      io.to(roomId).emit('addSpyMasterTag', {
+          name: userId,
       });
 
-      socket.emit("UpdateKey", { name: data.name, room: data.room, wordColors: JSON.stringify(game.getWordColors())})
+      socket.emit("UpdateKey", {wordColors: JSON.stringify(game.getWordColors())})
     });
 
     socket.on('isNowAButtonToucher', (data) => {
-      console.log("Adding button toucher: " + data.name);
-      var game = games.get(data.room);
-      game.addButtonToucher(data.name);
+      console.log("Adding button toucher: " + userId);
+      var game = games.get(roomId);
+      game.addButtonToucher(userId);
 
-      io.to(data.room).emit('addButtonToucherTag', {
-          name: data.name,
+      io.to(roomId).emit('addButtonToucherTag', {
+          name: userId,
       });
     });
 
     socket.on('noLongerAButtonToucher', (data) => {
-      console.log("Removing button toucher: " + data.name);
-      var game = games.get(data.room);
-      game.removeButtonToucher(data.name);
+      console.log("Removing button toucher: " + userId);
+      var game = games.get(roomId);
+      game.removeButtonToucher(userId);
 
-      io.to(data.room).emit('removeButtonToucherTag', {
-          name: data.name,
+      io.to(roomId).emit('removeButtonToucherTag', {
+          name: userId,
       });
     });
 
     socket.on('attemptTeamSwitch', (data) => {
-      console.log("Attempting team switch: " + data.name + " to color: " + data.color);
-      var game = games.get(data.room);
-      game.setPlayerColor(data.name, data.color);
+      console.log("Attempting team switch: " + userId + " to color: " + data.color);
+      var game = games.get(roomId);
+      game.setPlayerColor(userId, data.color);
 
-      io.to(data.room).emit('teamSwitch', data);
+      io.to(roomId).emit('teamSwitch', data);
     });
 
     socket.on('disconnect', function() {
@@ -201,11 +200,11 @@ io.on('connection', (socket) => {
        * Handle the turn played by either player and notify the other.
        */
     socket.on('clickTile', (data) => {
-      console.log("Tile " + data.row + ", " + data.column + " was clicked for room: " + data.room);
-      var game = games.get(data.room);
+      console.log("Tile " + data.row + ", " + data.column + " was clicked for room: " + roomId);
+      var game = games.get(roomId);
 
       // TODO verify its a button presser
-      io.to(data.room).emit('tileClicked', {
+      io.to(roomId).emit('tileClicked', {
           row: data.row,
           column: data.column,
           type: game.makeGuess(data.row, data.column),
@@ -217,11 +216,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('turnComplete', (data) => {
-      console.log("Turn complete (done guessing) for room: " + data.room);
-      var game = games.get(data.room);
+      console.log("Turn complete (done guessing) for room: " + roomId);
+      var game = games.get(roomId);
       game.turnComplete();
 
-      io.to(data.room).emit('turnUpdate', {
+      io.to(roomId).emit('turnUpdate', {
           currentTurn: game.getCurrentTurn(),
       });
     });

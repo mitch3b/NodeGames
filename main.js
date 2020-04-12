@@ -2,7 +2,6 @@
   let player;
   let team;
   let game;
-  let roomId;
   let gameOver = false;
 
   /*
@@ -40,8 +39,7 @@
 
     socket.emit('clickTile', {
       row: row,
-      column: column,
-      room: roomId
+      column: column
     });
   }
 
@@ -60,13 +58,13 @@
       $('#spyMaster').prop('checked', false);
       $(".show-words").attr('class','tile');
       player.isButtonPresser = false;
-      socket.emit('restartGame', { name, room: roomId, isDirty: $('#isDirtyCheckboxRestart').is(':checked')});
+      socket.emit('restartGame', {isDirty: $('#isDirtyCheckboxRestart').is(':checked')});
     }
   });
 
   $('#teamSelect').on('change', function() {
     console.log("Attempting team switch...");
-    socket.emit('attemptTeamSwitch', {  name: player.name, room: roomId, color: $('#teamSelect').val(),
+    socket.emit('attemptTeamSwitch', {color: $('#teamSelect').val(),
     isSpyMaster: $('#spyMaster').is(':checked'), isButtonToucher: $('#buttonToucher').is(':checked') });
   });
 
@@ -86,7 +84,7 @@
       return;
     }
 
-    socket.emit('turnComplete', {  name: player.name, room: roomId });
+    socket.emit('turnComplete', {});
   });
 
   $('#buttonToucher').change(
@@ -95,10 +93,10 @@
       player.isButtonPresser = isChecked;
 
       if(isChecked) {
-        socket.emit('isNowAButtonToucher', {  name: player.name, room: roomId });
+        socket.emit('isNowAButtonToucher', {});
       }
       else {
-        socket.emit('noLongerAButtonToucher', {  name: player.name, room: roomId });
+        socket.emit('noLongerAButtonToucher', {});
       }
     });
 
@@ -107,7 +105,7 @@
       var isChecked = $(this).is(':checked')
       if(isChecked) {
         $(".tile").addClass("show-words");
-        socket.emit('isNowASpyMaster', {  name: player.name, room: roomId });
+        socket.emit('isNowASpyMaster', {});
       }
       else {
         // Reset class to just tile
@@ -117,7 +115,7 @@
         });
         $('#blueWordList').empty();
         $('#redWordList').empty();
-        socket.emit('noLongerASpyMaster', { name: player.name, room: roomId });
+        socket.emit('noLongerASpyMaster', {});
       }
     });
 
@@ -128,10 +126,8 @@
     }
   }
 
-  // roomId Id of the room in which the game is running on the server.
   class Game {
-    constructor(roomId, words) {
-      this.roomId = roomId;
+    constructor(words) {
       this.board = [];
       this.words = words;
     }
@@ -192,7 +188,7 @@
       alert('Please enter your name and game ID.');
       return;
     }
-    socket.emit('attemptToJoinGame', { name, room: roomID });
+    socket.emit('attemptToJoinGame', { name: name, room: roomID });
   });
 
   // ####################################
@@ -248,7 +244,7 @@
   // Edit a game
   // ####################################
   function getNewWord(row, column) {
-    socket.emit('getNewWord', { name, room: roomId, row: row, column: column });
+    socket.emit('getNewWord', { row: row, column: column });
   }
 
   // ####################################
@@ -263,8 +259,7 @@
   socket.on('InitForJoiningPlayer', (data) => {
     if(!player) {
       player = new Player(data.name);
-      roomId = data.room;
-      $('#inviteUrl').text(url + roomId);
+      $('#inviteUrl').text(url + data.room);
     }
 
     // Reset class to just tile
@@ -277,7 +272,7 @@
     $('#redWordList').empty();
         
     codeNamesGame = JSON.parse(data.game);
-    game = new Game(data.room, codeNamesGame.words);
+    game = new Game(codeNamesGame.words);
     game.displayBoard();
 
     if(codeNamesGame.bluePlayers.includes(player.name)) {
