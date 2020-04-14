@@ -12,8 +12,8 @@
   */
 
   //TODO make this configurable...
-  let url = 'http://localhost:5000';
-  //let url = 'https://mitch3a-code-names.herokuapp.com/';
+  //let url = 'http://localhost:5000';
+  let url = 'https://mitch3a-code-names.herokuapp.com/';
   console.log("Using url: " + url);
   const socket = io.connect(url);
 
