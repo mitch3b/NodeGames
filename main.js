@@ -264,7 +264,7 @@
   socket.on('InitForJoiningPlayer', (data) => {
     if(!player) {
       player = new Player(data.name);
-      $('#inviteUrl').text(url + data.room);
+      $('#inviteUrl').text(url + "?room=" + data.room);
     }
 
     // Reset class to just tile

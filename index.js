@@ -71,6 +71,16 @@ io.on('connection', (socket) => {
       });
     }
 
+    function getRandomRoomName(name) {
+      let result = name + "-" + Math.floor(Math.random() * 999);
+      
+      while (games.has(result)) {
+        result = name + "-" + Math.floor(Math.random() * 999);
+      }
+        
+      return result;
+    }
+
     // #################################
     // Create a new game room and notify the creator of game.
      // #################################
@@ -85,7 +95,7 @@ io.on('connection', (socket) => {
       game.init(data.isDirty);
       userId = data.name;
 
-      var roomName = `room-${++rooms}`
+      var roomName = getRandomRoomName(data.name);
       roomId = roomName;
       socket.join(roomName);
       sendToCurrentUser('newGame', { name: data.name, room: roomName, color: game.getPlayerColor(data.name), game: JSON.stringify(game, Set_toJSON)});
