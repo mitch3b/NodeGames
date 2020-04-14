@@ -104,8 +104,13 @@
     function(){
       var isChecked = $(this).is(':checked')
       if(isChecked) {
-        $(".tile").addClass("show-words");
-        socket.emit('isNowASpyMaster', {});
+        var r = confirm("Are you sure you want to reveal the code words?");
+        if (r == true) {
+          $(".tile").addClass("show-words");
+          socket.emit('isNowASpyMaster', {});
+        } else {
+          $('#spyMaster').prop('checked', false);
+        }
       }
       else {
         // Reset class to just tile
@@ -309,7 +314,7 @@
         $(`#button_${i}${j}`).addClass("key-" + wordColors[i][j]);
       }
     }
-    //mitchtodo
+
     var flippedBlueWords = $('.blue.tile').map(function() { return this.innerHTML; });
     var blueWords = $('.key-blue').map(function() { return this.innerHTML; });
     for(let i = 0 ; i < blueWords.length ; i++) {
