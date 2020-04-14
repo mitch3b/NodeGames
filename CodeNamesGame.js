@@ -13,21 +13,19 @@ require('fs').readFileSync('undercoverWordList.txt', 'utf-8').split(/\r?\n/).for
 
 console.log("Read in " + allWords.length + " words.");
 
-function getRandomWord() {
-  return allWords[Math.floor(Math.random() * allWords.length)];
-}
-
 function getRandomWords(numWords, wordList) {
-    var result = new Array(numWords),
-        len = wordList.length,
-        taken = new Array(len);
-    if (numWords > len)
-        throw new RangeError("getRandom: more elements taken than available");
-    while (numWords--) {
-        var x = Math.floor(Math.random() * len);
-        result[numWords] = wordList[x in taken ? taken[x] : x];
-        taken[x] = --len in taken ? taken[len] : len;
+    var result = new Array(numWords);
+
+    if (numWords > wordList.length)
+        throw new RangeError("getRandom: more elements taken than available" + numWords + ":" + wordList.length);
+    var wordsFound = 0;
+    while( wordsFound < numWords ) {
+      var index = Math.floor( Math.random()*wordList.length );
+      result[wordsFound] =  wordList[index];
+      wordsFound++;
+      wordList.splice( index, 1 ); // Remove the item from the array
     }
+  
     return result;
 }
 
@@ -37,6 +35,8 @@ class CodeNamesGame {
     this.adminName = adminName;
     this.bluePlayers = new Set().add(adminName);
     this.redPlayers = new Set();
+    this.unusedCleanWords = [];
+    this.unusedDirtyWords = [];
   }
 
   reset(isDirty) {
@@ -47,8 +47,19 @@ class CodeNamesGame {
     this.spyMasters = new Set();
     this.buttonTouchers = new Set();
     this.words = new Array(GRID_SIZE);
+    
+    console.log("Size unusedCleanWords is: " + this.unusedCleanWords.length);
+    if(this.unusedCleanWords.length < GRID_SIZE*GRID_SIZE) {
+      console.log("Resetting unusedCleanWords...");
+      this.unusedCleanWords = [...allWords];
+    }
+    
+    if(this.unusedDirtyWords.length < GRID_SIZE*GRID_SIZE) {
+      console.log("Resetting unusedDirtyWords...");
+      this.unusedDirtyWords = [...allDirtyWords];
+    }
 
-    var randomWords = getRandomWords(GRID_SIZE*GRID_SIZE, (isDirty ? allDirtyWords : allWords));
+    var randomWords = getRandomWords(GRID_SIZE*GRID_SIZE, (isDirty ? this.unusedDirtyWords : this.unusedCleanWords));
 
     for (var i = 0; i < this.words.length; i++) {
       this.words[i] = new Array(GRID_SIZE);

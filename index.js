@@ -155,6 +155,15 @@ io.on('connection', (socket) => {
       if (typeof value === 'object' && value instanceof Set) {
         return [...value];
       }
+      
+      if (key=="unusedCleanWords") {
+        return "none";
+      }
+      
+      if (key=="unusedDirtyWords") {
+        return "none";
+      }
+      
       return value;
     }
 
