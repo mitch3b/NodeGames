@@ -12,8 +12,8 @@
   */
 
   //TODO make this configurable...
-  //let url = 'http://localhost:5000';
-  let url = 'https://mitch3a-code-names.herokuapp.com/';
+  let url = 'http://localhost:5000';
+  //let url = 'https://mitch3a-code-names.herokuapp.com/';
   console.log("Using url: " + url);
   const socket = io.connect(url);
 
@@ -196,7 +196,7 @@
   // ####################################
   socket.on('newGame', (data) => {
     codeNamesGame = JSON.parse(data.game);
-    game = new Game(data.room, codeNamesGame.words);
+    game = new Game(codeNamesGame.words);
     roomId = data.room;
     $('#inviteUrl').text(url + "?room=" + roomId);
     game.displayBoard();

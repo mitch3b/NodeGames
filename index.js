@@ -34,14 +34,50 @@ io.on('connection', (socket) => {
     //Scope of just the current user
     var userId;
     var roomId;
+    
+    function log(funcName, message) {
+      console.log(roomId + ": " + userId + " sent " + funcName + ": " + message);
+    }
+    
+    function logReceivedMessage(funcName, data) {
+      console.log(roomId + ": Received" + funcName + " sent by " + userId + " with data: " + JSON.stringify(data));
+    }
+    
+    function sendToCurrentUser(messageId, data) {
+      log(messageId, roomId + ":message to self sent by " + userId + " with data: " + JSON.stringify(data));
+      
+      socket.emit(messageId, data);
+    }
+    
+    function broadcastToRoom(messageId, data) {
+      log(messageId, roomId + ": message to all users sent by " + userId + " with data: " + JSON.stringify(data));
+      
+       io.to(roomId).emit(messageId, data);
+    }
+
+    function listenForMessage(messageId, callback) {
+      socket.on(messageId, (data) => {
+        console.log(roomId + ": Received " + messageId + " sent by " + userId + " with data: " + JSON.stringify(data));
+        
+        try {
+          callback(data);
+        } 
+        catch(err) {
+          console.log(roomId + ":Issue processing " + messageId + " sent by " + userId + ": "  + err.message);
+          return;
+        }
+        
+        console.log(roomId + ": Succesfully processed " + messageId + " sent by " + userId);
+      });
+    }
 
     // #################################
     // Create a new game room and notify the creator of game.
      // #################################
-    socket.on('createGame', (data) => {
+    listenForMessage('createGame', function(data) {      
       if(!isAlphaNumeric(data.name)) {
         console.log("Can't create game with invalid username: " + data.name);
-        socket.emit('joinGameError', { message: 'Username must be only letters and numbers' });
+        sendToCurrentUser('joinGameError', { message: 'Username must be only letters and numbers' });
         return;
       }
       
@@ -52,13 +88,13 @@ io.on('connection', (socket) => {
       var roomName = `room-${++rooms}`
       roomId = roomName;
       socket.join(roomName);
-      socket.emit('newGame', { name: data.name, room: roomName, color: game.getPlayerColor(data.name), game: JSON.stringify(game, Set_toJSON)});
+      sendToCurrentUser('newGame', { name: data.name, room: roomName, color: game.getPlayerColor(data.name), game: JSON.stringify(game, Set_toJSON)});
       games.set(roomName,  game);
       console.log("Added Game: " + roomName + " with admin " + data.name);
       console.log("Currently " + games.size + " games happening...");
     });
 
-    socket.on('restartGame', (data) => {
+    listenForMessage('restartGame', function(data) {
       var game = games.get(roomId);
       game.reset(data.isDirty);
 
@@ -70,25 +106,23 @@ io.on('connection', (socket) => {
     // #################################
     // Join a game.
     // #################################
-    socket.on('attemptToJoinGame', function (data) {
-      console.log("Adding Player: " + data.name + " to game " + data.room);
-      
+    listenForMessage('attemptToJoinGame', function (data) {
       if(!isAlphaNumeric(data.name)) {
         console.log("Can't create game with invalid username: " + data.name);
-        socket.emit('joinGameError', { message: 'Username must be only letters and numbers' });
+        sendToCurrentUser('joinGameError', { message: 'Username must be only letters and numbers' });
         return;
       }
 
       var room = io.nsps['/'].adapter.rooms[data.room];
       if (!room) {
         console.log("Failed to Added Player: " + data.name + ". Room does not exist in io...");
-        socket.emit('joinGameError', { message: 'Game ID does not exist in...' });
+        sendToCurrentUser('joinGameError', { message: 'Game ID does not exist in...' });
         return;
       }
 
       if(!games.has(data.room)) {
         console.log("Failed to Added Player: " + data.name + ". Game ID does not exist in games tracker...");
-        socket.emit('joinGameError', { message: 'Game ID does not exist...' });
+        sendToCurrentUser('joinGameError', { message: 'Game ID does not exist...' });
         return;
       }
 
@@ -96,7 +130,7 @@ io.on('connection', (socket) => {
 
       if(game.hasPlayerAlready(data.name)) {
         console.log("Failed to Added Player: " + data.name + ". Name Already taken...");
-        socket.emit('joinGameError', { message: 'Name already taken...' });
+        sendToCurrentUser('joinGameError', { message: 'Name already taken...' });
         return;
       }
 
@@ -111,7 +145,7 @@ io.on('connection', (socket) => {
 
       //TODO all the game info
       //Setup the player joining
-      socket.emit("InitForJoiningPlayer", {color: game.getPlayerColor(data.name), room: data.room, game: JSON.stringify(game, Set_toJSON)})
+      sendToCurrentUser("InitForJoiningPlayer", {color: game.getPlayerColor(data.name), room: data.room, game: JSON.stringify(game, Set_toJSON)})
 
       console.log("Successfully Added Player: " + data.name + " to game " + roomId);
       console.log("Currently " + game.getNumPlayers() + " players in game: " + roomId);
@@ -124,56 +158,54 @@ io.on('connection', (socket) => {
       return value;
     }
 
-    socket.on('noLongerASpyMaster', (data) => {
-      console.log("Removing spy master: " + userId);
+    listenForMessage('noLongerASpyMaster', function(data) { 
       var game = games.get(roomId);
       game.removeSpyMaster(userId);
 
-      io.to(roomId).emit('removeSpyMasterTag', {
+      broadcastToRoom('removeSpyMasterTag', {
           name: userId,
       });
     });
 
-    socket.on('isNowASpyMaster', (data) => {
-      console.log("Adding spy master: " + userId);
+    listenForMessage('isNowASpyMaster', function(data) {
       var game = games.get(roomId);
       game.addSpyMaster(data.userId);
-      io.to(roomId).emit('addSpyMasterTag', {
+      broadcastToRoom('addSpyMasterTag', {
           name: userId,
       });
 
-      socket.emit("UpdateKey", {wordColors: JSON.stringify(game.getWordColors())})
+      sendToCurrentUser("UpdateKey", {wordColors: JSON.stringify(game.getWordColors())})
     });
 
-    socket.on('isNowAButtonToucher', (data) => {
-      console.log("Adding button toucher: " + userId);
+    listenForMessage('isNowAButtonToucher', function(data) {
       var game = games.get(roomId);
       game.addButtonToucher(userId);
 
-      io.to(roomId).emit('addButtonToucherTag', {
+      broadcastToRoom('addButtonToucherTag', {
           name: userId,
       });
     });
 
-    socket.on('noLongerAButtonToucher', (data) => {
-      console.log("Removing button toucher: " + userId);
+    listenForMessage('noLongerAButtonToucher', function(data) {
       var game = games.get(roomId);
       game.removeButtonToucher(userId);
 
-      io.to(roomId).emit('removeButtonToucherTag', {
+      broadcastToRoom('removeButtonToucherTag', {
           name: userId,
       });
     });
 
-    socket.on('attemptTeamSwitch', (data) => {
-      console.log("Attempting team switch: " + userId + " to color: " + data.color);
+    listenForMessage('attemptTeamSwitch', function(data) {
       var game = games.get(roomId);
       game.setPlayerColor(userId, data.color);
+      data.name = userId;
 
-      io.to(roomId).emit('teamSwitch', data);
+      broadcastToRoom('teamSwitch', data);
     });
 
     socket.on('disconnect', function() {
+      logReceivedMessage('disconnect');
+      
       try {
         var game = games.get(roomId);
         game.removePlayer(userId);
@@ -184,7 +216,7 @@ io.on('connection', (socket) => {
           games.delete(game);
         }
         else {
-          io.to(roomId).emit('playerLeft', {
+          broadcastToRoom('playerLeft', {
             name: userId,
           });
         }
@@ -200,11 +232,12 @@ io.on('connection', (socket) => {
        * Handle the turn played by either player and notify the other.
        */
     socket.on('clickTile', (data) => {
-      console.log("Tile " + data.row + ", " + data.column + " was clicked for room: " + roomId);
+      logReceivedMessage('clickTile', data);
+      
       var game = games.get(roomId);
 
       // TODO verify its a button presser
-      io.to(roomId).emit('tileClicked', {
+      broadcastToRoom('tileClicked', {
           row: data.row,
           column: data.column,
           type: game.makeGuess(data.row, data.column),
@@ -216,11 +249,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('turnComplete', (data) => {
-      console.log("Turn complete (done guessing) for room: " + roomId);
+      logReceivedMessage('turnComplete', data);
+      
       var game = games.get(roomId);
       game.turnComplete();
 
-      io.to(roomId).emit('turnUpdate', {
+      broadcastToRoom('turnUpdate', {
           currentTurn: game.getCurrentTurn(),
       });
     });
