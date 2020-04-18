@@ -254,6 +254,11 @@ io.on('connection', (socket) => {
       logReceivedMessage('clickTile', data);
       
       var game = games.get(roomId);
+      
+      if(game.alreadyGuessed(data.row, data.column)) {
+        console.log("row: " + data.row + ", column: " + data.column + " has already been guessed.");
+        return;
+      }
 
       // TODO verify its a button presser
       broadcastToRoom('tileClicked', {

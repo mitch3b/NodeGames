@@ -163,8 +163,17 @@ class CodeNamesGame {
     this.redPlayers.delete(name);
     this.bluePlayers.delete(name);
   }
+  
+  alreadyGuessed(row, column) {
+    return (this.clicked[row][column] != "not-revealed");
+  }
 
   makeGuess(row, column) {
+    if(this.alreadyGuessed(row, column)) {
+      console.log("row: " + row + ", column: " + column + " has already been guessed.");
+      return;
+    }
+    
     let result = this.wordColors[row][column];
     this.clicked[row][column] = result;
 
