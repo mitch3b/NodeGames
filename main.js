@@ -408,7 +408,11 @@
 
     if(data.winner != 'none') {
       gameOver = true;
-      alert("Congratulations to the " + ((data.winner == 'blue') ? "Blue" : "Red") + " team!");
+      // Background rendering isn't instantaneous (has its own lifecycle) so adding this dummy
+      // dummy timeout will make sure the alert happens AFTER the display changes above
+      setTimeout(function() {
+        alert("Congratulations to the " + ((data.winner == 'blue') ? "Blue" : "Red") + " team!");
+      }, 200)      
     }
   });
 
